@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xbsafe.springboot.dao.MenuMapper">
+	
+	<resultMap type="com.xbsafe.springboot.bean.Menu" id="menuResultMap">
+		<id column="menu_id" property="menuId"/>
+		<result column="menu_name" property="menuName"/>
+		<result column="menu_url" property="menuUrl"/>
+		<result column="parent_id" property="parentId"/>
+	</resultMap>
+
+	<select id="queryAllParentMenu" resultMap="menuResultMap">
+		SELECT
+			* 
+		FROM
+			t_menu 
+		WHERE
+			parent_id 
+		IS NULL
+	</select>
+	
+	<select id="querySubMenuByParentId" parameterType="int" resultMap="menuResultMap">
+		SELECT
+			*
+		FROM 
+			t_menu 
+		WHERE 
+			parent_id=#{parentId} 
+	</select>
+	
+	
+</mapper>

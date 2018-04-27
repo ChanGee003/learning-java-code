@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xbsafe.springboot.dao.UserMapper">
+	<sql id="userColumns">loginname,username,password,rights,status,role_id</sql>
+
+	<resultMap type="com.xbsafe.springboot.bean.User" id="userAndRoleResultMap">
+		<id column="user_id" property="userId"/>
+		<result column="loginname" property="loginname"/>
+		<result column="username" property="username"/>
+		<result column="password" property="password"/>
+		<result column="user_rights" property="rights"/>
+		<result column="status" property="status"/>
+		<result column="last_login" property="lastLogin"/>
+		<association property="role" column="role_id" javaType="com.xbsafe.springboot.bean.Role">
+			<id column="role_id" property="roleId"/>
+			<result column="role_name" property="roleName"/>
+			<result column="role_rights" property="rights"/>
+		</association>
+	</resultMap>
+	<resultMap type="com.xbsafe.springboot.bean.User" id="userResultMap">
+		<id column="user_id" property="userId"/>
+		<result column="loginname" property="loginname"/>
+		<result column="username" property="username"/>
+		<result column="password" property="password"/>
+		<result column="rights" property="rights"/>
+		<result column="status" property="status"/>
+		<result column="role_id" property="roleId"/>
+		<result column="last_login" property="lastLogin"/>
+	</resultMap>
+
+	<select id="queryUsers" resultMap="userResultMap">
+		SELECT 
+			*
+		FROM 
+			t_user;
+	</select>	
+
+	<select id="queryUserInfo" parameterType="com.xbsafe.springboot.bean.User" resultMap="userResultMap">
+		SELECT 
+			* 
+		FROM 
+			t_user 
+		WHERE 
+			1=1
+		<if test="loginname!=null and password!=null">
+		AND 
+			loginname = #{loginname} and password=#{password}
+		</if>
+		<if test="userId!=null and userId>0">
+		AND 
+			user_id = #{userId}
+		</if>
+	</select>
+	
+	<update id="updateLastLogin" parameterType="com.xbsafe.springboot.bean.User">
+		UPDATE 
+			t_user 
+		SET 
+			last_login=#{lastLogin} 
+		WHERE 
+			user_id=#{userId}
+	</update>
+	
+	<select id="getUserAndRoleById" parameterType="int" resultMap="userAndRoleResultMap">
+		SELECT 
+			u.user_id,
+			u.username,
+			u.rights as user_rights,
+			u.loginname,
+			u.password,
+			r.role_id,
+			r.role_name,
+			r.rights as role_rights 
+		FROM 
+			t_user u 
+		LEFT JOIN 
+			t_role r 
+		ON 
+			u.role_id=r.role_id 
+		WHERE 
+			u.status=0 
+		AND
+			u.user_id=#{userId}
+	</select>
+
+	<insert id="addUser" parameterType="com.xbsafe.springboot.bean.User">
+		INSERT INTO
+			t_user (
+			username,
+			PASSWORD,
+			realname,
+			email,
+			STATUS,
+			role_id) 
+		VALUES 
+			(#{username},
+			#{password},
+			#{realname},
+			#{email},
+			#{status},
+			#{roleID})
+	</insert>
+
+	<select id="queryUserByID" resultType="com.xbsafe.springboot.bean.User">
+		SELECT 
+			tu.`user_id` userID,
+			tu.`username` username,
+			tu.`password` password,
+			tu.`realname` realname,
+			tu.`email` email,
+			tu.`status` status,
+			tu.`role_id` roleID
+		FROM 
+			t_user tu
+		WHERE 
+			tu.`user_id`=#{userID}
+	</select>
+	
+	<update id="editUser" parameterType="com.xbsafe.springboot.bean.User">
+		UPDATE 
+			t_user 
+		SET 
+			username=#{username},
+			realname=#{realname},
+			email=#{email},
+			STATUS=#{status},
+			role_id=#{roleID} 
+		WHERE 
+			user_id=#{userID}
+	</update>
+	
+	<update id="resetUserPassword" parameterType="com.xbsafe.springboot.bean.User">
+		UPDATE 
+			t_user 
+		SET 
+			PASSWORD=#{password}
+		WHERE 
+			user_id=#{userID}
+	</update>
+</mapper>
